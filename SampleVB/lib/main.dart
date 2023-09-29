@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'board_page.dart';
+import 'package:samplevb/home_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,13 +17,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
         useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          iconTheme: IconThemeData(color: Colors.white),
-          color: Colors.blueAccent, //<-- SEE HERE
+        appBarTheme: AppBarTheme(
+          foregroundColor: Colors.black,
+          iconTheme: IconThemeData(color: Colors.black),
+          color: Colors.white, //<-- SEE HERE
         ),
       ),
-      home:  BoardPage(),
+      home: HomePage(),
     );
   }
 }
-

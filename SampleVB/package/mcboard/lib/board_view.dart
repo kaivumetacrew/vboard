@@ -1,32 +1,24 @@
-
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mcboard/draw_view.dart';
+import 'package:mcboard/gesture_controller.dart';
 import 'package:screenshot/screenshot.dart';
 
+import 'board_config.dart';
+import 'board_controller.dart';
 import 'board_data.dart';
 import 'board_item.dart';
 import 'board_item_view.dart';
+import 'board_util.dart';
 import 'gesture_detector.dart';
-import 'util.dart';
-import 'board_controller.dart';
 
 class BoardView extends StatefulWidget {
-  static const double widthDip = 320;
-  static const double heightDip = 426;
-
-  static const double ratio = 3 / 4;
-
-  double scale = 1;
-
   BoardController controller;
 
   BoardView({
     Key? key,
     required this.controller,
-    this.scale = 1,
   }) : super(key: key);
 
   @override
@@ -35,11 +27,13 @@ class BoardView extends StatefulWidget {
 
 class _BoardViewState extends State<BoardView> {
   BoardController get controller => widget.controller;
+  GestureController gestureController = GestureController();
 
   @override
   void initState() {
     super.initState();
     controller.drawController.onDrawEnd = () => {_onDrawEnd()};
+    //gestureController.startScale();
   }
 
   @override
@@ -57,26 +51,28 @@ class _BoardViewState extends State<BoardView> {
     return Screenshot(
       controller: controller.screenshotController,
       child: Container(
-        width: BoardView.widthDip,
-        height: BoardView.heightDip,
+        width: BoardConfigs.widthDip,
+        height: BoardConfigs.heightDip,
         decoration: _decoration(controller.value),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(controller.value.borderRadius-controller.value.borderWidth),
-          child: Stack(
-            children: [
-              _background(controller.value),
-              _itemsContainer(),
-              _drawContainer(),
-            ],
-          ),
+          borderRadius: BorderRadius.circular(
+              controller.value.borderRadius - controller.value.borderWidth),
+          child: ValueListenableBuilder(
+              valueListenable: controller,
+              builder: (BuildContext context, BoardData data, Widget? child) {
+                return Stack(
+                  children: [
+                    _background(data),
+                    _itemsContainer(data),
+                    _drawContainer(data),
+                  ],
+                );
+              }),
         ),
       ),
     );
   }
 
-  /// Board item widgets
-  List<Widget> get boardItemWidgets =>
-      controller.value.items.map(_itemToWidget).toList();
 
   Widget _itemToWidget(BoardItem e) {
     return BoardItemView(
@@ -111,7 +107,8 @@ class _BoardViewState extends State<BoardView> {
       }
       final color = data.backgroundColor;
       if (color != null) {
-        return Container(color: BoardUtil.parseColor(color, orElse: Colors.white));
+        return Container(
+            color: BoardUtil.parseColor(color, orElse: Colors.white));
       }
       return Container(color: Colors.white);
     }
@@ -120,22 +117,32 @@ class _BoardViewState extends State<BoardView> {
   }
 
   /// Container for board widgets
-  Widget _itemsContainer() {
+  Widget _itemsContainer(BoardData data) {
+    final boardItems = data.items.map(_itemToWidget).toList();
     return Container(
-        width: double.infinity,
-        height: double.infinity,
-        //color: Colors.red,
-        child: MatrixGestureDetector(
-          onScaleStart: () {},
-          onScaleEnd: () {},
-          scale: widget.scale,
-          onMatrixUpdate: _onMatrixUpdate,
-          child: Stack(children: boardItemWidgets),
-        ));
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.transparent,
+      child: MatrixGestureDetector(
+        controller: gestureController,
+        onScaleStart: () {},
+        onScaleEnd: () {},
+        onPanStart: (DragStartDetails details) {},
+        onPanUpdate: (DragUpdateDetails details) {},
+        clipChild: true,
+        scale: BoardConfigs.scale,
+        onMatrixUpdate: _onMatrixUpdate,
+        child: Container(
+          color: Colors.transparent,
+          // MUST HAVE BACKGROUND IF IT NONE, WILL GET ERROR WHEN DRAG
+          child: Stack(children: boardItems),
+        ),
+      ),
+    );
   }
 
   /// Container for user draw by finger
-  Widget _drawContainer() {
+  Widget _drawContainer(BoardData data) {
     return ValueListenableBuilder(
       valueListenable: controller.isDrawingNotifier,
       builder: (
@@ -148,8 +155,8 @@ class _BoardViewState extends State<BoardView> {
             top: 0,
             left: 0,
             child: DrawView(
-              width: BoardView.widthDip,
-              height: BoardView.heightDip,
+              width: BoardConfigs.widthDip,
+              height: BoardConfigs.heightDip,
               controller: controller.drawController,
             ),
           );
@@ -186,7 +193,9 @@ class _BoardViewState extends State<BoardView> {
 
   /// Callback on finger draw tap up
   void _onDrawEnd() {
-    controller.addNewItem(BoardItemDraw(drawPoints: controller.drawController.points));
+    controller.addNewItem(BoardItemDraw(), (item) {
+      item.drawPoints = controller.drawController.points;
+    });
     controller.drawController.clear();
   }
 }

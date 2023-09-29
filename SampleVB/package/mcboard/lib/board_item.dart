@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../util.dart';
+
+import '../board_util.dart';
 import 'board_point.dart';
 
 abstract class BoardItem {
@@ -32,13 +33,31 @@ abstract class BoardItem {
   static BoardItem none = BoardItemText(id: -1);
 
   bool get isNone => id == -1;
+
+  BoardTransformData get transformData {
+    var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
+    Offset delta = Offset(array[3] - array[0], array[4] - array[1]);
+    return BoardTransformData(
+      translation: Offset(array[0], array[1]),
+      delta: delta,
+    );
+  }
+
+  static Matrix4 compose(Matrix4? matrix, Matrix4? translationMatrix,
+      Matrix4? scaleMatrix, Matrix4? rotationMatrix) {
+    matrix ??= Matrix4.identity();
+    if (translationMatrix != null) matrix = translationMatrix * matrix;
+    if (scaleMatrix != null) matrix = scaleMatrix * matrix;
+    if (rotationMatrix != null) matrix = rotationMatrix * matrix;
+    return matrix!;
+  }
 }
 
 class BoardItemImage extends BoardItem {
-  String? storageImagePath;
-  String? savedImagePath;
+  String? storagePath;
+  String? savedPath;
 
-  String? get imagePath => storageImagePath ?? savedImagePath;
+  String? get imagePath => storagePath ?? savedPath;
 
   BoardItemImage({
     super.key,
@@ -85,4 +104,18 @@ class BoardItemDraw extends BoardItem {
 
   Color get uiDrawColor =>
       drawColor == null ? Colors.black : BoardUtil.parseColor(drawColor);
+}
+
+class BoardTransformData {
+  Offset translation;
+  Offset delta;
+
+  double get scale => delta.distance;
+
+  double get rotation => delta.direction;
+
+  BoardTransformData({
+    required this.translation,
+    required this.delta,
+  });
 }

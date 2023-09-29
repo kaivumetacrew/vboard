@@ -2,6 +2,7 @@
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
+import 'package:mcboard/gesture_config.dart';
 
 typedef MatrixGestureDetectorCallback = void Function(
     MatrixGestureDetectorState state,
@@ -27,23 +28,7 @@ class MatrixGestureDetector extends StatefulWidget {
   ///
   final Widget child;
 
-  /// Whether to detect translation gestures during the event processing.
-  ///
-  /// Defaults to true.
-  ///
-  final bool shouldTranslate;
-
-  /// Whether to detect scale gestures during the event processing.
-  ///
-  /// Defaults to true.
-  ///
-  final bool shouldScale;
-
-  /// Whether to detect rotation gestures during the event processing.
-  ///
-  /// Defaults to true.
-  ///
-  final bool shouldRotate;
+  final ValueNotifier<GestureConfigs> controller;
 
   /// Whether [ClipRect] widget should clip [child] widget.
   ///
@@ -63,20 +48,22 @@ class MatrixGestureDetector extends StatefulWidget {
   final double scale;
   final VoidCallback onScaleStart;
   final VoidCallback onScaleEnd;
+  GestureDragStartCallback onPanStart;
+  GestureDragUpdateCallback onPanUpdate;
 
-  const MatrixGestureDetector({
+  MatrixGestureDetector({
     Key? key,
     required this.onMatrixUpdate,
     required this.child,
-    this.shouldTranslate = true,
+    required this.controller,
     this.scale = 1,
-    this.shouldScale = true,
-    this.shouldRotate = true,
     this.clipChild = true,
     this.focalPointAlignment,
     this.behavior = HitTestBehavior.deferToChild,
     required this.onScaleStart,
     required this.onScaleEnd,
+    required this.onPanStart,
+    required this.onPanUpdate,
   }) : super(key: key);
 
   @override
@@ -119,15 +106,27 @@ class MatrixGestureDetectorState extends State<MatrixGestureDetector> {
   Matrix4 matrix = Matrix4.identity();
   int id = -1;
 
+  GestureConfigs get configs => widget.controller.value;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  ValueNotifier<String> gestureDetailNotifier = ValueNotifier("_value");
+
   @override
   Widget build(BuildContext context) {
     Widget child =
         widget.clipChild ? ClipRect(child: widget.child) : widget.child;
+
     return GestureDetector(
       behavior: widget.behavior,
       onScaleStart: onScaleStart,
       onScaleUpdate: onScaleUpdate,
       onScaleEnd: onScaleEnd,
+      //onPanStart: widget.onPanStart,
+      //onPanUpdate: widget.onPanUpdate,
       child: child,
     );
   }
@@ -158,14 +157,14 @@ class MatrixGestureDetectorState extends State<MatrixGestureDetector> {
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
-    widget
-        .onScaleStart(); // Why added onScaleUpdate? refer: https://github.com/pskink/matrix_gesture_detector/issues/5#issuecomment-553748004
+    // Why added onScaleUpdate? refer: https://github.com/pskink/matrix_gesture_detector/issues/5#issuecomment-553748004
+    widget.onScaleStart();
     translationDeltaMatrix = Matrix4.identity();
     scaleDeltaMatrix = Matrix4.identity();
     rotationDeltaMatrix = Matrix4.identity();
 
     // handle matrix translating
-    if (widget.shouldTranslate) {
+    if (configs.shouldTranslate) {
       Offset translationDelta = translationUpdater.update(details.focalPoint);
       translationDeltaMatrix = _translate(translationDelta);
       matrix = translationDeltaMatrix * matrix;
@@ -177,14 +176,14 @@ class MatrixGestureDetectorState extends State<MatrixGestureDetector> {
         : focalPointAlignment.alongSize(context.size!);
 
     // handle matrix scaling
-    if (widget.shouldScale && details.scale != 1.0) {
+    if (configs.shouldScale && details.scale != 1.0) {
       double scaleDelta = scaleUpdater.update(details.scale);
       scaleDeltaMatrix = _scale(scaleDelta, focalPoint);
       matrix = scaleDeltaMatrix * matrix;
     }
 
     // handle matrix rotating
-    if (widget.shouldRotate && details.rotation != 0.0) {
+    if (configs.shouldRotate && details.rotation != 0.0) {
       double rotationDelta = rotationUpdater.update(details.rotation);
       rotationDeltaMatrix = _rotate(rotationDelta, focalPoint);
       matrix = rotationDeltaMatrix * matrix;

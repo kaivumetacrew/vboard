@@ -15,22 +15,6 @@ class BoardItemView extends StatelessWidget {
   /// Space between selected item widget and border
   EdgeInsets get _boardItemMargin => const EdgeInsets.all(2.0);
 
-  /// Border of selected item
-  Widget get _boardItemBorder => Positioned(
-        top: 0,
-        bottom: 0,
-        right: 0,
-        left: 0,
-        child: Container(
-          decoration: BoxDecoration(
-              border: Border.all(color: Colors.black, width: 0.5)),
-          child: Container(
-            decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 0.5)),
-          ),
-        ),
-      );
-
   BoardItemView({
     Key? key,
     required this.item,
@@ -40,23 +24,17 @@ class BoardItemView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Text
     if (item is BoardItemText) {
       final widget = _textBoardItemView();
-      return isSelected ? _animatedItem(widget) : _positionedItem(widget);
+      return _selectableItem(widget);
     }
-
-    // Image
     if (item is BoardItemImage) {
       final widget = _imageBoardItemView();
-      return isSelected ? _animatedItem(widget) : _positionedItem(widget);
+      return _selectableItem(widget);
     }
-
-    // Draw
     if (item is BoardItemDraw) {
       return _drawBoardItemView();
     }
-
     return _errorImage();
   }
 
@@ -111,7 +89,11 @@ class BoardItemView extends StatelessWidget {
     );
   }
 
-  Widget _positionedItem(Widget itemWidget) {
+  Widget _selectableItem(Widget widget) {
+    return isSelected ? _selectedItem(widget) : _unselectItem(widget);
+  }
+
+  Widget _unselectItem(Widget itemWidget) {
     return Transform(
       transform: item.matrix,
       child: Container(
@@ -123,24 +105,42 @@ class BoardItemView extends StatelessWidget {
     );
   }
 
-  Widget _animatedItem(Widget itemWidget) {
+  Widget _selectedItem(Widget itemWidget) {
     return AnimatedBuilder(
       animation: item.matrixNotifier,
       builder: (ctx, child) {
-        return Transform(
-          transform: item.matrix,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              _boardItemBorder,
-              Container(
+        final transData = item.transformData;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Transform(
+              transform: item.matrix,
+              child: Container(
                 margin: _boardItemMargin,
                 child: Container(child: itemWidget),
               ),
-            ],
-          ),
+            ),
+            _fillPositioned(
+              Transform(
+                transform: item.matrix,
+                child: _selectionBorder(0.5 + 1 / transData.scale),
+              ),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  Widget _selectionBorder(double borderWidth) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.purple,
+          width: borderWidth,
+        ),
+      ),
+      child: Container(),
     );
   }
 
@@ -157,6 +157,16 @@ class BoardItemView extends StatelessWidget {
           style: const TextStyle(fontSize: 8, color: Colors.white),
         ),
       ),
+    );
+  }
+
+  Widget _fillPositioned(Widget child) {
+    return Positioned(
+      top: 0,
+      bottom: 0,
+      right: 0,
+      left: 0,
+      child: child,
     );
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:mcboard/board_config.dart';
+import 'package:mcboard/board_util.dart';
 import 'package:screenshot/screenshot.dart';
 
 import 'board_data.dart';
@@ -6,7 +8,6 @@ import 'board_item.dart';
 import 'draw_controller.dart';
 
 class BoardController extends ValueNotifier<BoardData> {
-
   BoardData data;
   BoardItem selectedItem = BoardItem.none;
   Function(BoardItem) onItemTap = (item) {};
@@ -115,9 +116,14 @@ notifyListeners();
     isDrawingNotifier.value = false;
   }
 
-  void addNewItem(BoardItem item) {
-    item.id = value.items.length;
+  void addNewItem<T extends BoardItem>(T item, Function(T) block) {
+    item.id = DateTime.now().millisecond;
     item.lastUpdate = DateTime.now().millisecondsSinceEpoch;
+    item.matrix.scale(0.5);
+    item.matrix.translate(
+      BoardConfigs.widthDip / 2,
+      BoardConfigs.heightDip / 2,
+    );
     if (item is BoardItemDraw) {
       item.drawColor = currentDrawColor;
     } else {
@@ -127,6 +133,7 @@ notifyListeners();
       item.textColor = currentTextColor;
     }
     selectedItem = item;
+    block(item);
     value.items.add(item);
     notifyListeners();
   }
@@ -136,5 +143,13 @@ notifyListeners();
         value.items.reversed.firstWhere((element) => element is BoardItemDraw);
     value.items.removeWhere((element) => element.id == item.id);
     notifyListeners();
+  }
+
+  Future pickImage() async {
+    final file = await BoardUtil.pickImage();
+    if (file == null) return;
+    addNewItem(BoardItemImage(), (item) {
+      item.storagePath = file.path;
+    });
   }
 }

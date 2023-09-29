@@ -16,7 +16,7 @@ class BoardUtil {
     return Color(int.parse(buffer.toString(), radix: 16));
   }
 
-  Future<File?> pickImage() async {
+  static Future<File?> pickImage() async {
     try {
       img_picker.ImagePicker picker = img_picker.ImagePicker();
       img_picker.XFile? pickedFile = await picker.pickImage(

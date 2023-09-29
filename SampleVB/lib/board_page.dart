@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mcboard/board.dart';
-import 'package:samplevb/board_toolbar.dart';
+import 'package:samplevb/tool_page.dart';
 
 class BoardPage extends StatefulWidget {
-  const BoardPage({super.key});
+  BoardPage({super.key});
 
   @override
   State<BoardPage> createState() => _BoardPageState();
@@ -28,20 +28,38 @@ class _BoardPageState extends State<BoardPage> {
         title: Text("Sample board"),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child:   Row(
-            children: [
-              AspectRatio(
-                aspectRatio: 3 / 4,
-                child: BoardView(controller: boardController),
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(8),
+              child: BoardView(controller: boardController),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(top: BorderSide(width: 1, color: Colors.grey)),
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.add_rounded),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return ToolPage(controller: boardController);
+                          },
+                        );
+                      },
+                    )
+                  ],
+                ),
               ),
-              const Padding(padding: EdgeInsets.only(left: 8)),
-              Expanded(
-                child: BoardToolBar(),
-              ),
-            ],
-          ),
+            )
+          ],
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );

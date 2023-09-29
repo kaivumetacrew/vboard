@@ -4,15 +4,10 @@ import 'board_item.dart';
 
 class BoardData {
   int id;
-
   String name;
-
   String? backgroundColor;
-
   String? backgroundImagePath;
-
   List<BoardItem> items;
-
   double borderWidth;
   double borderRadius;
   String? borderColor;
