@@ -83,7 +83,7 @@ class BoardItemText extends BoardItem {
 }
 
 class BoardItemDraw extends BoardItem {
-  List<Point>? drawPoints;
+  List<BoardPoint>? drawPoints;
   String drawColor;
   double drawWidth;
 

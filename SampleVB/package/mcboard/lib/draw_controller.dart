@@ -5,10 +5,10 @@ import 'package:image/image.dart' as img;
 
 import 'board_point.dart';
 
-class DrawController extends ValueNotifier<List<Point>> {
+class DrawController extends ValueNotifier<List<BoardPoint>> {
   /// constructor
   DrawController({
-    List<Point>? points,
+    List<BoardPoint>? points,
     this.disabled = false,
     this.penColor = Colors.black,
     this.strokeCap = StrokeCap.butt,
@@ -19,7 +19,7 @@ class DrawController extends ValueNotifier<List<Point>> {
     this.onDrawStart,
     this.onDrawMove,
     this.onDrawEnd,
-  }) : super(points ?? <Point>[]);
+  }) : super(points ?? <BoardPoint>[]);
 
   /// If set to true canvas writting will be disabled.
   bool disabled;
@@ -52,28 +52,28 @@ class DrawController extends ValueNotifier<List<Point>> {
   VoidCallback? onDrawEnd;
 
   /// getter for points representing draw on 2D canvas
-  List<Point> get points => value;
+  List<BoardPoint> get points => value;
 
   /// stack-like list of point to save user's latest action
-  final List<List<Point>> _latestActions = <List<Point>>[];
+  final List<List<BoardPoint>> _latestActions = <List<BoardPoint>>[];
 
   /// stack-like list that use to save points when user undo the draw
-  final List<List<Point>> _revertedActions = <List<Point>>[];
+  final List<List<BoardPoint>> _revertedActions = <List<BoardPoint>>[];
 
   /// setter for points representing draw on 2D canvas
-  set points(List<Point> points) {
+  set points(List<BoardPoint> points) {
     value = points;
   }
 
   /// add point to point collection
-  void addPoint(Point point) {
+  void addPoint(BoardPoint point) {
     value.add(point);
     notifyListeners();
   }
 
   /// REMEMBERS CURRENT CANVAS STATE IN UNDO STACK
   void pushCurrentStateToUndoStack() {
-    _latestActions.add(<Point>[...points]);
+    _latestActions.add(<BoardPoint>[...points]);
     //CLEAR ANY UNDO-ED ACTIONS. IF USER UNDO-ED ANYTHING HE ALREADY MADE
     // ANOTHER CHANGE AND LEFT THAT OLD PATH.
     _revertedActions.clear();
@@ -88,22 +88,22 @@ class DrawController extends ValueNotifier<List<Point>> {
   /// The biggest x value for all points.
   /// Will return `null` if there are no points.
   double? get maxXValue =>
-      isEmpty ? null : points.map((Point p) => p.offset.dx).reduce(math.max);
+      isEmpty ? null : points.map((BoardPoint p) => p.offset.dx).reduce(math.max);
 
   /// The biggest y value for all points.
   /// Will return `null` if there are no points.
   double? get maxYValue =>
-      isEmpty ? null : points.map((Point p) => p.offset.dy).reduce(math.max);
+      isEmpty ? null : points.map((BoardPoint p) => p.offset.dy).reduce(math.max);
 
   /// The smallest x value for all points.
   /// Will return `null` if there are no points.
   double? get minXValue =>
-      isEmpty ? null : points.map((Point p) => p.offset.dx).reduce(math.min);
+      isEmpty ? null : points.map((BoardPoint p) => p.offset.dx).reduce(math.min);
 
   /// The smallest y value for all points.
   /// Will return `null` if there are no points.
   double? get minYValue =>
-      isEmpty ? null : points.map((Point p) => p.offset.dy).reduce(math.min);
+      isEmpty ? null : points.map((BoardPoint p) => p.offset.dy).reduce(math.min);
 
   /// Calculates a default height based on existing points.
   /// Will return `null` if there are no points.
@@ -117,10 +117,10 @@ class DrawController extends ValueNotifier<List<Point>> {
 
   /// Calculates a default width based on existing points.
   /// Will return `null` if there are no points.
-  List<Point>? _translatePoints(List<Point> points) => isEmpty
+  List<BoardPoint>? _translatePoints(List<BoardPoint> points) => isEmpty
       ? null
       : points
-      .map((Point p) => Point(
+      .map((BoardPoint p) => BoardPoint(
       Offset(
         p.offset.dx - minXValue! + penStrokeWidth,
         p.offset.dy - minYValue! + penStrokeWidth,
@@ -131,7 +131,7 @@ class DrawController extends ValueNotifier<List<Point>> {
 
   /// Clear the canvas
   void clear() {
-    value = <Point>[];
+    value = <BoardPoint>[];
     _latestActions.clear();
     _revertedActions.clear();
   }
@@ -142,13 +142,13 @@ class DrawController extends ValueNotifier<List<Point>> {
   /// Then, it will modify the real points with the last action.
   void undo() {
     if (_latestActions.isNotEmpty) {
-      final List<Point> lastAction = _latestActions.removeLast();
-      _revertedActions.add(<Point>[...lastAction]);
+      final List<BoardPoint> lastAction = _latestActions.removeLast();
+      _revertedActions.add(<BoardPoint>[...lastAction]);
       if (_latestActions.isNotEmpty) {
-        points = <Point>[..._latestActions.last];
+        points = <BoardPoint>[..._latestActions.last];
         return;
       }
-      points = <Point>[];
+      points = <BoardPoint>[];
       notifyListeners();
     }
   }
@@ -157,9 +157,9 @@ class DrawController extends ValueNotifier<List<Point>> {
   /// Then, it will modify the real points with the last reverted action.
   void redo() {
     if (_revertedActions.isNotEmpty) {
-      final List<Point> lastRevertedAction = _revertedActions.removeLast();
-      _latestActions.add(<Point>[...lastRevertedAction]);
-      points = <Point>[...lastRevertedAction];
+      final List<BoardPoint> lastRevertedAction = _revertedActions.removeLast();
+      _latestActions.add(<BoardPoint>[...lastRevertedAction]);
+      points = <BoardPoint>[...lastRevertedAction];
       notifyListeners();
       return;
     }
@@ -198,7 +198,7 @@ class DrawController extends ValueNotifier<List<Point>> {
       backgroundColor.alpha.toInt(),
     );
 
-    final List<Point> translatedPoints = _translatePoints(points)!;
+    final List<BoardPoint> translatedPoints = _translatePoints(points)!;
 
     final int canvasWidth = width ?? defaultWidth!;
     final int canvasHeight = height ?? defaultHeight!;
@@ -220,7 +220,7 @@ class DrawController extends ValueNotifier<List<Point>> {
     // read the drawing points list and draw the image
     // it uses the same logic as the CustomPainter Paint function
     for (int i = 0; i < translatedPoints.length - 1; i++) {
-      if (translatedPoints[i + 1].type == PointType.move) {
+      if (translatedPoints[i + 1].type == BoardPointType.move) {
         img.drawLine(
           drawImage,
           (translatedPoints[i].offset.dx + xOffset).toInt(),
@@ -255,11 +255,11 @@ class DrawController extends ValueNotifier<List<Point>> {
     String colorToHex(Color c) =>
         '#${c.value.toRadixString(16).padLeft(8, '0')}';
 
-    String formatPoint(Point p) =>
+    String formatPoint(BoardPoint p) =>
         '${p.offset.dx.toStringAsFixed(2)},${p.offset.dy.toStringAsFixed(2)}';
 
     final String polyLines = <String>[
-      for (final List<Point> stroke in _latestActions)
+      for (final List<BoardPoint> stroke in _latestActions)
         '<polyline '
             'fill="none" '
             'stroke="${colorToHex(penColor)}" '

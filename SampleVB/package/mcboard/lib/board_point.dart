@@ -1,9 +1,9 @@
 import 'dart:ui';
 
 /// one point on canvas represented by offset and type
-class Point {
+class BoardPoint {
   /// constructor
-  Point(this.offset, this.type, this.pressure);
+  BoardPoint(this.offset, this.type, this.pressure);
 
   /// x and y value on 2D canvas
   Offset offset;
@@ -21,16 +21,16 @@ class Point {
     'type': type,
   };
 
-  static Point fromJson(Map<String, dynamic> json) {
+  static BoardPoint fromJson(Map<String, dynamic> json) {
     Offset offset = Offset(json['x'], json['y']);
     double pressure = json['pressure'];
     int type = json['type'];
-    return Point(offset, type, pressure);
+    return BoardPoint(offset, type, pressure);
   }
 }
 
 /// type of user display finger movement
-class PointType {
+class BoardPointType {
   /// one touch on specific place - tap
   static int tap = 1;
 

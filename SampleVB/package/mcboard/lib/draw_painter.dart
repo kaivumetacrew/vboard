@@ -21,7 +21,7 @@ class DrawPainter extends CustomPainter {
   }
 
   final Paint _penStyle;
-  List<Point> points;
+  List<BoardPoint> points;
   Color strokeColor;
   double strokeWidth;
   StrokeCap strokeCap;
@@ -33,7 +33,7 @@ class DrawPainter extends CustomPainter {
       return;
     }
     for (int i = 0; i < (points.length - 1); i++) {
-      if (points[i + 1].type == PointType.move) {
+      if (points[i + 1].type == BoardPointType.move) {
         _penStyle.strokeWidth *= points[i].pressure;
         canvas.drawLine(
           points[i].offset,

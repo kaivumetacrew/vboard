@@ -6,6 +6,7 @@ import 'package:screenshot/screenshot.dart';
 import 'board_data.dart';
 import 'board_item.dart';
 import 'draw_controller.dart';
+import 'gesture_controller.dart';
 
 class BoardController extends ValueNotifier<BoardData> {
   BoardData data;
@@ -18,6 +19,7 @@ class BoardController extends ValueNotifier<BoardData> {
   String? boardColor;
   DrawController drawController = DrawController();
   ValueNotifier<bool> isDrawingNotifier = ValueNotifier(false);
+  GestureController gestureController = GestureController();
   ScreenshotController screenshotController = ScreenshotController();
   bool get isDrawing => isDrawingNotifier.value;
   double portraitWidth = 0;
@@ -31,6 +33,7 @@ class BoardController extends ValueNotifier<BoardData> {
   void dispose() {
     drawController.dispose();
     isDrawingNotifier.dispose();
+    gestureController.dispose();
     super.dispose();
   }
 

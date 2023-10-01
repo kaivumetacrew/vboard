@@ -45,11 +45,11 @@ class MatrixGestureDetector extends StatefulWidget {
   /// When set, it will be used for computing a "fixed" focal point
   /// aligned relative to the size of this widget.
   final Alignment? focalPointAlignment;
-  final double scale;
-  final VoidCallback onScaleStart;
-  final VoidCallback onScaleEnd;
-  GestureDragStartCallback onPanStart;
-  GestureDragUpdateCallback onPanUpdate;
+  double scale;
+  VoidCallback? onScaleStart = () {};
+  VoidCallback? onScaleEnd = () {};
+  GestureDragStartCallback? onPanStart;
+  GestureDragUpdateCallback? onPanUpdate;
 
   MatrixGestureDetector({
     Key? key,
@@ -60,10 +60,10 @@ class MatrixGestureDetector extends StatefulWidget {
     this.clipChild = true,
     this.focalPointAlignment,
     this.behavior = HitTestBehavior.deferToChild,
-    required this.onScaleStart,
-    required this.onScaleEnd,
-    required this.onPanStart,
-    required this.onPanUpdate,
+    this.onScaleStart,
+    this.onScaleEnd,
+    this.onPanStart,
+    this.onPanUpdate,
   }) : super(key: key);
 
   @override
@@ -125,8 +125,8 @@ class MatrixGestureDetectorState extends State<MatrixGestureDetector> {
       onScaleStart: onScaleStart,
       onScaleUpdate: onScaleUpdate,
       onScaleEnd: onScaleEnd,
-      //onPanStart: widget.onPanStart,
-      //onPanUpdate: widget.onPanUpdate,
+      onPanStart: widget.onPanStart,
+      onPanUpdate: widget.onPanUpdate,
       child: child,
     );
   }
@@ -145,7 +145,7 @@ class MatrixGestureDetectorState extends State<MatrixGestureDetector> {
   );
 
   void onScaleStart(ScaleStartDetails details) {
-    widget.onScaleStart();
+    widget.onScaleStart?.call();
 
     translationUpdater.value = details.focalPoint;
     scaleUpdater.value = 1.0;
@@ -153,12 +153,12 @@ class MatrixGestureDetectorState extends State<MatrixGestureDetector> {
   }
 
   void onScaleEnd(ScaleEndDetails details) {
-    widget.onScaleEnd();
+    widget.onScaleEnd?.call();
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
     // Why added onScaleUpdate? refer: https://github.com/pskink/matrix_gesture_detector/issues/5#issuecomment-553748004
-    widget.onScaleStart();
+    widget.onScaleStart?.call();
     translationDeltaMatrix = Matrix4.identity();
     scaleDeltaMatrix = Matrix4.identity();
     rotationDeltaMatrix = Matrix4.identity();

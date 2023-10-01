@@ -81,13 +81,13 @@ class DrawViewState extends State<DrawView> {
                       activePointerId == event.pointer)) {
                 activePointerId = event.pointer;
                 widget.controller.onDrawStart?.call();
-                _addPoint(event, PointType.tap);
+                _addPoint(event, BoardPointType.tap);
               }
             },
             onPointerUp: (PointerUpEvent event) {
               _ensurePointerCleanup();
               if (activePointerId == event.pointer) {
-                _addPoint(event, PointType.tap);
+                _addPoint(event, BoardPointType.tap);
                 widget.controller.pushCurrentStateToUndoStack();
                 widget.controller.onDrawEnd?.call();
                 activePointerId = null;
@@ -96,7 +96,7 @@ class DrawViewState extends State<DrawView> {
             onPointerCancel: (PointerCancelEvent event) {
               _ensurePointerCleanup();
               if (activePointerId == event.pointer) {
-                _addPoint(event, PointType.tap);
+                _addPoint(event, BoardPointType.tap);
                 widget.controller.pushCurrentStateToUndoStack();
                 widget.controller.onDrawEnd?.call();
                 activePointerId = null;
@@ -105,7 +105,7 @@ class DrawViewState extends State<DrawView> {
             onPointerMove: (PointerMoveEvent event) {
               _ensurePointerCleanup();
               if (activePointerId == event.pointer) {
-                _addPoint(event, PointType.move);
+                _addPoint(event, BoardPointType.move);
                 widget.controller.onDrawMove?.call();
               }
             },
@@ -169,12 +169,12 @@ class DrawViewState extends State<DrawView> {
       // LINK IT WITH PREVIOUS POINT
       int t = pointType;
       if (_isOutsideDrawField) {
-        t = PointType.tap;
+        t = BoardPointType.tap;
       }
       setState(() {
         //IF USER WAS OUTSIDE OF CANVAS WE WILL RESET THE HELPER VARIABLE AS HE HAS RETURNED
         _isOutsideDrawField = false;
-        widget.controller.addPoint(Point(
+        widget.controller.addPoint(BoardPoint(
           o,
           t,
           widget.dynamicPressureSupported ? event.pressure : 1.0,
@@ -219,12 +219,12 @@ class DrawPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, _) {
-    final List<Point> points = _controller.value;
+    final List<BoardPoint> points = _controller.value;
     if (points.isEmpty) {
       return;
     }
     for (int i = 0; i < (points.length - 1); i++) {
-      if (points[i + 1].type == PointType.move) {
+      if (points[i + 1].type == BoardPointType.move) {
         _penStyle.strokeWidth *= points[i].pressure;
         canvas.drawLine(
           points[i].offset,

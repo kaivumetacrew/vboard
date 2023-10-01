@@ -27,23 +27,12 @@ class BoardView extends StatefulWidget {
 
 class _BoardViewState extends State<BoardView> {
   BoardController get controller => widget.controller;
-  GestureController gestureController = GestureController();
 
   @override
   void initState() {
     super.initState();
     controller.drawController.onDrawEnd = () => {_onDrawEnd()};
-    //gestureController.startScale();
-  }
-
-  @override
-  void didUpdateWidget(covariant BoardView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+    //controller.gestureController.startTranslate();
   }
 
   @override
@@ -124,11 +113,7 @@ class _BoardViewState extends State<BoardView> {
       height: double.infinity,
       color: Colors.transparent,
       child: MatrixGestureDetector(
-        controller: gestureController,
-        onScaleStart: () {},
-        onScaleEnd: () {},
-        onPanStart: (DragStartDetails details) {},
-        onPanUpdate: (DragUpdateDetails details) {},
+        controller: controller.gestureController,
         clipChild: true,
         scale: BoardConfigs.scale,
         onMatrixUpdate: _onMatrixUpdate,

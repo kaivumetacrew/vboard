@@ -23,23 +23,25 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => BoardPage(),
-                      ),
-                    );
-                  },
-                  child: Text("Board")),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => BoardPage(),
+                    ),
+                  );
+                },
+                child: Text("Board"),
+              ),
               TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => Demo(),
-                      ),
-                    );
-                  },
-                  child: Text("Demo"))
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => Demo(),
+                    ),
+                  );
+                },
+                child: Text("Demo"),
+              ),
             ],
           ),
       )

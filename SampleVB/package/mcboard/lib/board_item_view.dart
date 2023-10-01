@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mcboard/draw_painter.dart';
+import 'package:mcboard/resizable_container.dart';
 
 import 'board_item.dart';
 
@@ -123,7 +124,32 @@ class BoardItemView extends StatelessWidget {
             _fillPositioned(
               Transform(
                 transform: item.matrix,
-                child: _selectionBorder(0.5 + 1 / transData.scale),
+                child: _selectionBorder(1 + 1 / transData.scale),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    //TODO:
+    return AnimatedBuilder(
+      animation: item.matrixNotifier,
+      builder: (ctx, child) {
+        final transData = item.transformData;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Transform(
+              transform: item.matrix,
+              child: Container(
+                margin: _boardItemMargin,
+                child: Container(child: itemWidget),
+              ),
+            ),
+            _fillPositioned(
+              Transform(
+                transform: item.matrix,
+                child: _selectionBorder(1 + 1 / transData.scale),
               ),
             ),
           ],
