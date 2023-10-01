@@ -131,31 +131,6 @@ class BoardItemView extends StatelessWidget {
         );
       },
     );
-    //TODO:
-    return AnimatedBuilder(
-      animation: item.matrixNotifier,
-      builder: (ctx, child) {
-        final transData = item.transformData;
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Transform(
-              transform: item.matrix,
-              child: Container(
-                margin: _boardItemMargin,
-                child: Container(child: itemWidget),
-              ),
-            ),
-            _fillPositioned(
-              Transform(
-                transform: item.matrix,
-                child: _selectionBorder(1 + 1 / transData.scale),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Widget _selectionBorder(double borderWidth) {
@@ -169,6 +144,13 @@ class BoardItemView extends StatelessWidget {
       child: Container(),
     );
   }
+  double height = 400;
+  double width = 200;
+  double top = 0;
+  double left = 0;
+  double cumulativeDy = 0;
+  double cumulativeDx = 0;
+  double cumulativeMid = 0;
 
   Widget _errorImage({String message = 'item error'}) {
     return Container(
@@ -195,4 +177,7 @@ class BoardItemView extends StatelessWidget {
       child: child,
     );
   }
+
+
+
 }

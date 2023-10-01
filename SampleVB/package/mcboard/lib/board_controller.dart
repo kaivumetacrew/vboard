@@ -92,7 +92,7 @@ class BoardController extends ValueNotifier<BoardData> {
   void setBackgroundColor(String color) {
     boardColor = color;
     boardImage = null;
-notifyListeners();
+    notifyListeners();
   }
 
   void setBackgroundImage(String image) {
@@ -142,8 +142,9 @@ notifyListeners();
   }
 
   void undoDraw() {
-    final item =
-        value.items.reversed.firstWhere((element) => element is BoardItemDraw);
+    final item = value.items.reversed.firstWhere((element) {
+      return element is BoardItemDraw;
+    });
     value.items.removeWhere((element) => element.id == item.id);
     notifyListeners();
   }

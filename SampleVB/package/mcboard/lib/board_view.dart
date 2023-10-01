@@ -32,7 +32,7 @@ class _BoardViewState extends State<BoardView> {
   void initState() {
     super.initState();
     controller.drawController.onDrawEnd = () => {_onDrawEnd()};
-    //controller.gestureController.startTranslate();
+    //controller.gestureController.startGesture();
   }
 
   @override
