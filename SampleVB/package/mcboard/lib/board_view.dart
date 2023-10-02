@@ -58,7 +58,8 @@ class BoardViewState extends State<BoardView> {
                   children: [
                     _background(data),
                     _itemsContainer(data),
-                    _drawContainer(data),
+                    _itemSelectBorder(),
+                    //_drawContainer(data),
                   ],
                 ),
               );
@@ -104,12 +105,17 @@ class BoardViewState extends State<BoardView> {
 
     return background();
   }
-
+Widget _itemSelectBorder(){
+    if(controller.selectedItem!=null){
+      return BoardItemSelecting(controller);
+    }
+    return const SizedBox();
+}
   /// Container for board widgets
   Widget _itemsContainer(BoardData data) {
     final boardItems = data.items.map(_itemToWidget).toList();
     if(controller.selectedItem!=null){
-      boardItems.add(BoardItemSelecting(controller));
+      //boardItems.add(BoardItemSelecting(controller));
     }
     return Container(
       width: double.infinity,
