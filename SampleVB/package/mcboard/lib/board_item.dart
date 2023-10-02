@@ -4,7 +4,7 @@ import '../board_util.dart';
 import 'board_point.dart';
 
 abstract class BoardItem {
-  int id = -1;
+  int id;
   Key? key;
   int lastUpdate = 0;
   double height = 0;

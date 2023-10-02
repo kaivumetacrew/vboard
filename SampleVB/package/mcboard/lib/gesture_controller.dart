@@ -4,6 +4,10 @@ import 'package:mcboard/gesture_config.dart';
 
 class GestureController extends ValueNotifier<GestureConfigs> {
   GestureController() : super(GestureConfigs());
+  VoidCallback? onScaleStart;
+  VoidCallback? onScaleEnd;
+  GestureDragStartCallback? onPanStart;
+  GestureDragUpdateCallback? onPanUpdate;
 
   void stopGesture() {
     value = GestureConfigs()
@@ -20,10 +24,12 @@ class GestureController extends ValueNotifier<GestureConfigs> {
   }
 
   void startTranslate() {
-    value = GestureConfigs()
-      ..shouldTranslate = true
-      ..shouldScale = false
-      ..shouldRotate = false;
+    if(value.shouldTranslate != true){
+      value = GestureConfigs()
+        ..shouldTranslate = true
+        ..shouldScale = false
+        ..shouldRotate = false;
+    }
   }
 
   void startScale() {
@@ -37,20 +43,4 @@ class GestureController extends ValueNotifier<GestureConfigs> {
 
   static Function onDrag = (double dx, double dy) {};
 
-  GestureDragStartCallback onPanStart = (DragStartDetails details) {
-    final point = selectedPoint;
-    if (point == null) return;
-    point.x = details.globalPosition.dx;
-    point.y = details.globalPosition.dy;
-  };
-
-  GestureDragUpdateCallback onPanUpdate = (DragUpdateDetails details) {
-    final point = selectedPoint;
-    if (point == null) return;
-    var dx = details.globalPosition.dx - point.x;
-    var dy = details.globalPosition.dy - point.y;
-    point.x = details.globalPosition.dx;
-    point.y = details.globalPosition.dy;
-    onDrag(dx, dy);
-  };
 }

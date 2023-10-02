@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:mcboard/board_item_selecting.dart';
 import 'package:mcboard/draw_view.dart';
-import 'package:mcboard/gesture_controller.dart';
 import 'package:screenshot/screenshot.dart';
 
 import 'board_config.dart';
@@ -28,11 +28,12 @@ class BoardView extends StatefulWidget {
 class BoardViewState extends State<BoardView> {
   BoardController get controller => widget.controller;
 
+  BoardData get data => controller.data;
+
   @override
   void initState() {
     super.initState();
     controller.drawController.onDrawEnd = () => {_onDrawEnd()};
-    //controller.gestureController.startTranslate();
   }
 
   @override
@@ -42,22 +43,26 @@ class BoardViewState extends State<BoardView> {
       child: Container(
         width: BoardConfigs.widthDip,
         height: BoardConfigs.heightDip,
-        decoration: _decoration(controller.value),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(
-              controller.value.borderRadius - controller.value.borderWidth),
-          child: ValueListenableBuilder(
-              valueListenable: controller,
-              builder: (BuildContext context, BoardData data, Widget? child) {
-                return Stack(
+        decoration: _decoration(data),
+        child: ValueListenableBuilder(
+            valueListenable: controller,
+            builder: (
+              BuildContext context,
+              BoardData data,
+              Widget? child,
+            ) {
+              final radius = data.borderRadius - data.borderWidth;
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(radius),
+                child: Stack(
                   children: [
                     _background(data),
                     _itemsContainer(data),
                     _drawContainer(data),
                   ],
-                );
-              }),
-        ),
+                ),
+              );
+            }),
       ),
     );
   }
@@ -69,12 +74,6 @@ class BoardViewState extends State<BoardView> {
       key: Key(e.id.toString()),
       item: e,
       isSelected: e.equal(controller.selectedItem),
-      onTap: (e) {
-        if (e is BoardItemText || e is BoardItemImage) {
-          controller.select(e);
-          controller.onItemTap(e);
-        }
-      },
     );
   }
 
@@ -109,6 +108,9 @@ class BoardViewState extends State<BoardView> {
   /// Container for board widgets
   Widget _itemsContainer(BoardData data) {
     final boardItems = data.items.map(_itemToWidget).toList();
+    if(controller.selectedItem!=null){
+      boardItems.add(BoardItemSelecting(controller));
+    }
     return Container(
       width: double.infinity,
       height: double.infinity,

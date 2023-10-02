@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:samplevb/board_page.dart';
-import 'package:samplevb/demo.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,16 +30,6 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
                 child: Text("Board"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => Demo(),
-                    ),
-                  );
-                },
-                child: Text("Demo"),
               ),
             ],
           ),

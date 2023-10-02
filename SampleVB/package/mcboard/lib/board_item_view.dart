@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:mcboard/board_item_dragger.dart';
 import 'package:mcboard/draw_painter.dart';
 
 import 'board_controller.dart';
@@ -9,22 +8,17 @@ import 'board_item.dart';
 import 'expandable_container.dart';
 
 class BoardItemView extends StatelessWidget {
-  /// Space between selected item widget and border
-  EdgeInsets get _boardItemMargin => const EdgeInsets.all(2.0);
 
   BoardItem item;
   bool isSelected;
   BoardController controller;
-  BoardItemEdge paner;
-  Function(BoardItem) onTap;
 
   BoardItemView({
     Key? key,
     required this.controller,
     required this.item,
     required this.isSelected,
-    required this.onTap,
-  }) : paner = BoardItemEdge(controller, item);
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -101,14 +95,14 @@ class BoardItemView extends StatelessWidget {
         color: Colors.transparent,
         child: Transform(
           transform: item.matrix,
-          child: Container(
-            margin: _boardItemMargin,
-            child: GestureDetector(
-              child: Container(child: content),
-              onTap: () {
-                onTap(item);
-              },
-            ),
+          child: GestureDetector(
+            child: Container(color: Colors.transparent, child: content),
+            onTap: () {
+              selectItem(item);
+            },
+            onDoubleTap: () {
+              selectItem(item);
+            },
           ),
         ),
       ),
@@ -123,59 +117,23 @@ class BoardItemView extends StatelessWidget {
         animation: item.matrixNotifier,
         builder: (ctx, child) {
           return Transform(
-              transform: item.matrix,
-              child: measureContainer(
-                Container(
-                  color: Colors.transparent,
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      GestureDetector(
-                        child: Container(child: content),
-                        onTap: () {
-                          onTap(item);
-                        },
-                      ),
-
-                      _selectionBorder(1 + 1 / item.transformData.scale),
-
-                      paner.centerLeft(),
-
-                      paner.centerRight(),
-
-                      paner.centerTop(),
-
-                      paner.centerBottom(),
-
-                      paner.topLeft(),
-
-                      paner.topRight(),
-
-                      paner.bottomLeft(),
-
-                      paner.bottomRight(),
-
-                    ],
-                  ),
-                ),
-              ));
+            transform: item.matrix,
+            child: measureContainer(
+              Container(
+                color: Colors.transparent,
+                child: Container(child: content),
+              ),
+            ),
+          );
         },
       ),
     );
   }
 
-  Widget _selectionBorder(double borderWidth) {
-    return _fillPositioned(
-      Container(
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          border: Border.all(
-            color: Colors.purple,
-            width: 2,
-          ),
-        ),
-      ),
-    );
+  void selectItem(BoardItem item) {
+    if (item is BoardItemText || item is BoardItemImage) {
+      controller.select(item);
+    }
   }
 
   Widget _errorImage({String message = 'item error'}) {
@@ -191,16 +149,6 @@ class BoardItemView extends StatelessWidget {
           style: const TextStyle(fontSize: 8, color: Colors.white),
         ),
       ),
-    );
-  }
-
-  Widget _fillPositioned(Widget child) {
-    return Positioned(
-      top: 0,
-      bottom: 0,
-      right: 0,
-      left: 0,
-      child: child,
     );
   }
 

@@ -11,7 +11,6 @@ import 'gesture_controller.dart';
 class BoardController extends ValueNotifier<BoardData> {
   BoardData data;
   BoardItem selectedItem = BoardItem.none;
-  Function(BoardItem) onItemTap = (item) {};
   String currentDrawColor = '#000000';
   String currentTextColor = '#000000';
   String? currentFont;
@@ -103,8 +102,10 @@ class BoardController extends ValueNotifier<BoardData> {
   }
 
   void select(BoardItem item) {
-    selectedItem = item;
-    notifyListeners();
+    if(item != selectedItem){
+      selectedItem = item;
+      notifyListeners();
+    }
   }
 
   void deselectItem() {

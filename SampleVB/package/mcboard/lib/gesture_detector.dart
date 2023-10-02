@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:mcboard/gesture_config.dart';
 
+import 'gesture_controller.dart';
+
 typedef MatrixGestureDetectorCallback = void Function(
     MatrixGestureDetectorState state,
     Matrix4 matrix,
@@ -28,7 +30,7 @@ class MatrixGestureDetector extends StatefulWidget {
   ///
   final Widget child;
 
-  final ValueNotifier<GestureConfigs> controller;
+  final GestureController controller;
 
   /// Whether [ClipRect] widget should clip [child] widget.
   ///
@@ -46,10 +48,6 @@ class MatrixGestureDetector extends StatefulWidget {
   /// aligned relative to the size of this widget.
   final Alignment? focalPointAlignment;
   double scale;
-  VoidCallback? onScaleStart = () {};
-  VoidCallback? onScaleEnd = () {};
-  GestureDragStartCallback? onPanStart;
-  GestureDragUpdateCallback? onPanUpdate;
 
   MatrixGestureDetector({
     Key? key,
@@ -60,10 +58,6 @@ class MatrixGestureDetector extends StatefulWidget {
     this.clipChild = true,
     this.focalPointAlignment,
     this.behavior = HitTestBehavior.deferToChild,
-    this.onScaleStart,
-    this.onScaleEnd,
-    this.onPanStart,
-    this.onPanUpdate,
   }) : super(key: key);
 
   @override
@@ -125,8 +119,8 @@ class MatrixGestureDetectorState extends State<MatrixGestureDetector> {
       onScaleStart: onScaleStart,
       onScaleUpdate: onScaleUpdate,
       onScaleEnd: onScaleEnd,
-      onPanStart: widget.onPanStart,
-      onPanUpdate: widget.onPanUpdate,
+      onPanStart: widget.controller.onPanStart,
+      onPanUpdate: widget.controller.onPanUpdate,
       child: child,
     );
   }
@@ -145,7 +139,7 @@ class MatrixGestureDetectorState extends State<MatrixGestureDetector> {
   );
 
   void onScaleStart(ScaleStartDetails details) {
-    widget.onScaleStart?.call();
+    widget.controller.onScaleStart?.call();
 
     translationUpdater.value = details.focalPoint;
     scaleUpdater.value = 1.0;
@@ -153,12 +147,12 @@ class MatrixGestureDetectorState extends State<MatrixGestureDetector> {
   }
 
   void onScaleEnd(ScaleEndDetails details) {
-    widget.onScaleEnd?.call();
+    widget.controller.onScaleEnd?.call();
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
     // Why added onScaleUpdate? refer: https://github.com/pskink/matrix_gesture_detector/issues/5#issuecomment-553748004
-    widget.onScaleStart?.call();
+    widget.controller.onScaleStart?.call();
     translationDeltaMatrix = Matrix4.identity();
     scaleDeltaMatrix = Matrix4.identity();
     rotationDeltaMatrix = Matrix4.identity();
