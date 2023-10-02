@@ -22,17 +22,17 @@ class BoardView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State createState() => _BoardViewState();
+  State createState() => BoardViewState();
 }
 
-class _BoardViewState extends State<BoardView> {
+class BoardViewState extends State<BoardView> {
   BoardController get controller => widget.controller;
 
   @override
   void initState() {
     super.initState();
     controller.drawController.onDrawEnd = () => {_onDrawEnd()};
-    //controller.gestureController.startGesture();
+    //controller.gestureController.startTranslate();
   }
 
   @override
@@ -65,6 +65,7 @@ class _BoardViewState extends State<BoardView> {
 
   Widget _itemToWidget(BoardItem e) {
     return BoardItemView(
+      controller: controller,
       key: Key(e.id.toString()),
       item: e,
       isSelected: e.equal(controller.selectedItem),

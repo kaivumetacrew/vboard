@@ -7,6 +7,10 @@ abstract class BoardItem {
   int id = -1;
   Key? key;
   int lastUpdate = 0;
+  double height = 0;
+  double width = 0;
+  double top = 0;
+  double left = 0;
 
   ValueNotifier<Matrix4> matrixNotifier = ValueNotifier(Matrix4.identity());
 

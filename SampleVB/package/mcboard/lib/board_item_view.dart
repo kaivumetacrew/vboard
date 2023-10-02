@@ -1,27 +1,31 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:mcboard/board_item_dragger.dart';
 import 'package:mcboard/draw_painter.dart';
 import 'package:mcboard/resizable_container.dart';
 
+import 'board_controller.dart';
 import 'board_item.dart';
+import 'expandable_container.dart';
 
 class BoardItemView extends StatelessWidget {
-  BoardItem item;
-
-  bool isSelected;
-
-  Function(BoardItem) onTap;
-
   /// Space between selected item widget and border
   EdgeInsets get _boardItemMargin => const EdgeInsets.all(2.0);
 
+  BoardItem item;
+  bool isSelected;
+  BoardController controller;
+  BoardItemEdge paner;
+  Function(BoardItem) onTap;
+
   BoardItemView({
     Key? key,
+    required this.controller,
     required this.item,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  }) : paner = BoardItemEdge(controller, item);
 
   @override
   Widget build(BuildContext context) {
@@ -41,38 +45,33 @@ class BoardItemView extends StatelessWidget {
 
   Widget _textBoardItemView() {
     final i = (item as BoardItemText);
-    return GestureDetector(
-      child: Text(
-        i.text!,
-        style: TextStyle(
-          fontFamily: i.font,
-          color: i.uiColor,
-          fontSize: 24,
-        ),
+    return Text(
+      i.text ?? "",
+      style: TextStyle(
+        fontFamily: i.font,
+        color: i.uiColor,
+        fontSize: 24,
       ),
-      onTap: () {
-        onTap(i);
-      },
     );
   }
 
   Widget _imageBoardItemView() {
     final i = (item as BoardItemImage);
-    Widget imageWidget;
-    if (item is BoardItemImage) {
-      imageWidget = Image.file(File(i.imagePath!), errorBuilder:
-          (BuildContext context, Object error, StackTrace? stackTrace) {
-        return _errorImage(message: 'This image error');
-      });
+    File file = File(i.imagePath!);
+    if (item.width > 0 && item.height > 0) {
+      return Image.file(
+        file,
+        fit: BoxFit.cover,
+        width: item.width,
+        height: item.height,
+        errorBuilder: _errorImageBuilder(),
+      );
     } else {
-      return _errorImage();
+      return Image.file(
+        file,
+        errorBuilder: _errorImageBuilder(),
+      );
     }
-    return GestureDetector(
-      child: imageWidget,
-      onTap: () {
-        onTap(item);
-      },
-    );
   }
 
   Widget _drawBoardItemView() {
@@ -90,67 +89,95 @@ class BoardItemView extends StatelessWidget {
     );
   }
 
-  Widget _selectableItem(Widget widget) {
-    return isSelected ? _selectedItem(widget) : _unselectItem(widget);
+  Widget _selectableItem(Widget child) {
+    return isSelected ? _selectedItem(child) : _unselectItem(child);
   }
 
-  Widget _unselectItem(Widget itemWidget) {
-    return Transform(
-      transform: item.matrix,
+  Widget _unselectItem(Widget content) {
+    return Positioned(
+      top: item.top,
+      left: item.left,
       child: Container(
-        margin: _boardItemMargin,
-        child: Container(
-          child: itemWidget,
+        width: item.width,
+        color: Colors.transparent,
+        child: Transform(
+          transform: item.matrix,
+          child: Container(
+            margin: _boardItemMargin,
+            child: GestureDetector(
+              child: Container(child: content),
+              onTap: () {
+                onTap(item);
+              },
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _selectedItem(Widget itemWidget) {
-    return AnimatedBuilder(
-      animation: item.matrixNotifier,
-      builder: (ctx, child) {
-        final transData = item.transformData;
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Transform(
+  Widget _selectedItem(Widget content) {
+    return Positioned(
+      top: item.top,
+      left: item.left,
+      child: AnimatedBuilder(
+        animation: item.matrixNotifier,
+        builder: (ctx, child) {
+          return Transform(
               transform: item.matrix,
-              child: Container(
-                margin: _boardItemMargin,
-                child: Container(child: itemWidget),
-              ),
-            ),
-            _fillPositioned(
-              Transform(
-                transform: item.matrix,
-                child: _selectionBorder(1 + 1 / transData.scale),
-              ),
-            ),
-          ],
-        );
-      },
+              child: measureContainer(
+                Container(
+                  color: Colors.transparent,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      GestureDetector(
+                        child: Container(child: content),
+                        onTap: () {
+                          onTap(item);
+                        },
+                      ),
+
+                      _selectionBorder(1 + 1 / item.transformData.scale),
+
+                      paner.centerLeft(),
+
+                      paner.centerRight(),
+
+                      paner.centerTop(),
+
+                      paner.centerBottom(),
+
+                      paner.topLeft(),
+
+                      paner.topRight(),
+
+                      paner.bottomLeft(),
+
+                      paner.bottomRight(),
+
+                    ],
+                  ),
+                ),
+              ));
+        },
+      ),
     );
   }
 
   Widget _selectionBorder(double borderWidth) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.purple,
-          width: borderWidth,
+    return _fillPositioned(
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          border: Border.all(
+            color: Colors.purple,
+            width: 2,
+          ),
         ),
       ),
-      child: Container(),
     );
   }
-  double height = 400;
-  double width = 200;
-  double top = 0;
-  double left = 0;
-  double cumulativeDy = 0;
-  double cumulativeDx = 0;
-  double cumulativeMid = 0;
 
   Widget _errorImage({String message = 'item error'}) {
     return Container(
@@ -178,6 +205,39 @@ class BoardItemView extends StatelessWidget {
     );
   }
 
+  Widget measureContainer(Widget child) {
+    if (item.width > 0 && item.height > 0) {
+      return Container(
+        width: item.width,
+        color: Colors.amber,
+        child: child,
+      );
+    }
+    return MeasureSize(
+      onChange: (Size size) {
+        if (size.width > 0 && size.height > 0) {
+          item.width = size.width;
+          item.height = size.height;
+          controller.notifyListeners();
+        }
+      },
+      child: Container(
+        width: item.width,
+        color: Colors.amber,
+        child: child,
+      ),
+    );
+  }
+
+  ImageErrorWidgetBuilder _errorImageBuilder() {
+    return (
+      BuildContext context,
+      Object error,
+      StackTrace? stackTrace,
+    ) {
+      return _errorImage(message: 'This image error');
+    };
+  }
 
 
 }

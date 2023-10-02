@@ -3,17 +3,17 @@ class GestureConfigs {
   ///
   /// Defaults to true.
   ///
-  bool shouldTranslate = true;
+  bool shouldTranslate = false;
 
   /// Whether to detect scale gestures during the event processing.
   ///
   /// Defaults to true.
   ///
-  bool shouldScale = true;
+  bool shouldScale = false;
 
   /// Whether to detect rotation gestures during the event processing.
   ///
   /// Defaults to true.
   ///
-  bool shouldRotate = true;
+  bool shouldRotate = false;
 }

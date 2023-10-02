@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-const double dragPointSize = 40.0;
-const double dragPointPadding = 12;
+const double dragPointSize = 60.0;
+const double haftDragPointSize = dragPointSize/2;
+const double dragPointPadding = 24;
 const double stepSize = 1;
 const double minSize = dragPointSize - dragPointPadding;
 enum Side { width, height }
@@ -347,7 +348,7 @@ class _DragPointState extends State<DragPoint> {
         padding: EdgeInsets.all(dragPointPadding),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.amber,
             border: Border.all(width: 2, color: Colors.black),
             shape: BoxShape.circle,
           ),

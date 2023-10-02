@@ -27,6 +27,7 @@ class BoardController extends ValueNotifier<BoardData> {
   double landscapeWidth = 0;
   double landscapeHeight = 0;
 
+
   BoardController(this.data) : super(data);
 
   @override
@@ -122,11 +123,7 @@ class BoardController extends ValueNotifier<BoardData> {
   void addNewItem<T extends BoardItem>(T item, Function(T) block) {
     item.id = DateTime.now().millisecond;
     item.lastUpdate = DateTime.now().millisecondsSinceEpoch;
-    item.matrix.scale(0.5);
-    item.matrix.translate(
-      BoardConfigs.widthDip / 2,
-      BoardConfigs.heightDip / 2,
-    );
+
     if (item is BoardItemDraw) {
       item.drawColor = currentDrawColor;
     } else {
@@ -135,6 +132,12 @@ class BoardController extends ValueNotifier<BoardData> {
     if (item is BoardItemText) {
       item.textColor = currentTextColor;
     }
+    if(item is BoardItemImage){
+      item.width = BoardConfigs.widthDip / 2;
+      item.left =  BoardConfigs.widthDip / 4;
+      item.top = BoardConfigs.heightDip / 8;
+    }
+
     selectedItem = item;
     block(item);
     value.items.add(item);
