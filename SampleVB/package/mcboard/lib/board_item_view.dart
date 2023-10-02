@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mcboard/board_item_dragger.dart';
 import 'package:mcboard/draw_painter.dart';
-import 'package:mcboard/resizable_container.dart';
 
 import 'board_controller.dart';
 import 'board_item.dart';

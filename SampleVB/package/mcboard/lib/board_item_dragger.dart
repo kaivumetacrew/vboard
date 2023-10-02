@@ -207,11 +207,7 @@ class BoardItemEdge {
     required Function(double, double) onDrag,
   }) {
     if (item.width > 0 && item.height > 0) {
-      return Positioned(
-        top: top,
-        left: left,
-        child: DragPoint(onDrag: onDrag),
-      );
+      return DragPoint.positioned(top: top, left: left, onDrag: onDrag);
     }
     return const SizedBox();
   }
