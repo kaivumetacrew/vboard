@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 enum Side { width, height }
 
 class DragPoint extends StatefulWidget {
-  static const double pointSize = 60.0;
-  static const double pointPadding = 26;
+  static const double pointSize = 36.0;
+  static const double pointPadding = 14;
   static const double stepSize = 1;
   static const double borderWidth = 2;
 
@@ -59,12 +59,12 @@ class _DragPointState extends State<DragPoint> {
         color: Colors.transparent,
         width: DragPoint.pointSize,
         height: DragPoint.pointSize,
-        padding: EdgeInsets.all(DragPoint.pointPadding),
+        padding: const EdgeInsets.all(DragPoint.pointPadding),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(width: 1, color: Colors.grey),
-            //shape: BoxShape.circle,
+            shape: BoxShape.circle,
           ),
         ),
       ),

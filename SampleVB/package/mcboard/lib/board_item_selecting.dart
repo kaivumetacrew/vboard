@@ -3,6 +3,7 @@ import 'package:mcboard/resizable_container.dart';
 
 import 'board_controller.dart';
 import 'board_item.dart';
+import 'gesture_controller.dart';
 
 class BoardItemSelecting extends StatelessWidget {
   double cumulativeDy = 0;
@@ -20,6 +21,8 @@ class BoardItemSelecting extends StatelessWidget {
   double get height => item.height;
 
   BoardController controller;
+
+  GestureController get gestureController => controller.gestureController;
 
   BoardItemSelecting(
     this.controller, {
@@ -69,14 +72,13 @@ class BoardItemSelecting extends StatelessWidget {
   Widget center() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(
-            DragPoint.haftPointSize - DragPoint.borderWidth),
+        padding: EdgeInsets.all(DragPoint.haftPointSize - DragPoint.borderWidth),
         child: GestureDetector(
           onTapDown: (TapDownDetails details) {
-            controller.gestureController.startTranslate();
-            controller.gestureController.onScaleEnd = () {
-              controller.gestureController.stopGesture();
-              controller.gestureController.onScaleEnd = () {};
+            gestureController.startTranslate();
+            gestureController.onScaleEnd = () {
+              gestureController.stopGesture();
+              gestureController.onScaleEnd = () {};
             };
           },
           child: Container(

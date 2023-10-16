@@ -156,7 +156,7 @@ class BoardItemView extends StatelessWidget {
     if (item.width > 0 && item.height > 0) {
       return Container(
         width: item.width,
-        color: Colors.amber,
+        color: Colors.transparent,
         child: child,
       );
     }
@@ -170,7 +170,7 @@ class BoardItemView extends StatelessWidget {
       },
       child: Container(
         width: item.width,
-        color: Colors.amber,
+        color: Colors.transparent,
         child: child,
       ),
     );

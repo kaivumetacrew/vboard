@@ -26,7 +26,7 @@ class BoardController extends ValueNotifier<BoardData> {
   double landscapeWidth = 0;
   double landscapeHeight = 0;
 
-
+  bool get hasSelectedItem => selectedItem.id != -1;
   BoardController(this.data) : super(data);
 
   @override

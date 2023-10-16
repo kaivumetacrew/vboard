@@ -1,23 +1,27 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:mcboard/board.dart';
 import 'package:mcboard/board_item_selecting.dart';
 import 'package:mcboard/draw_view.dart';
 import 'package:screenshot/screenshot.dart';
 
 import 'board_config.dart';
-import 'board_controller.dart';
-import 'board_data.dart';
 import 'board_item.dart';
 import 'board_item_view.dart';
 import 'board_util.dart';
+import 'board_widgets.dart';
 import 'gesture_detector.dart';
 
 class BoardView extends StatefulWidget {
   BoardController controller;
+  double? width;
+  double? height;
 
   BoardView({
     Key? key,
+    this.width,
+    this.height,
     required this.controller,
   }) : super(key: key);
 
@@ -38,6 +42,14 @@ class BoardViewState extends State<BoardView> {
 
   @override
   Widget build(BuildContext context) {
+    return BoardContainer(
+      width: widget.width,
+      height: widget.height,
+      child: _boardContent(),
+    );
+  }
+
+  Widget _boardContent(){
     return Screenshot(
       controller: controller.screenshotController,
       child: Container(
@@ -47,10 +59,10 @@ class BoardViewState extends State<BoardView> {
         child: ValueListenableBuilder(
             valueListenable: controller,
             builder: (
-              BuildContext context,
-              BoardData data,
-              Widget? child,
-            ) {
+                BuildContext context,
+                BoardData data,
+                Widget? child,
+                ) {
               final radius = data.borderRadius - data.borderWidth;
               return ClipRRect(
                 borderRadius: BorderRadius.circular(radius),
@@ -58,7 +70,6 @@ class BoardViewState extends State<BoardView> {
                   children: [
                     _background(data),
                     _itemsContainer(data),
-                    _itemSelectBorder(),
                     //_drawContainer(data),
                   ],
                 ),
@@ -67,7 +78,6 @@ class BoardViewState extends State<BoardView> {
       ),
     );
   }
-
 
   Widget _itemToWidget(BoardItem e) {
     return BoardItemView(
@@ -105,17 +115,14 @@ class BoardViewState extends State<BoardView> {
 
     return background();
   }
-Widget _itemSelectBorder(){
-    if(controller.selectedItem!=null){
-      return BoardItemSelecting(controller);
-    }
-    return const SizedBox();
-}
+
   /// Container for board widgets
   Widget _itemsContainer(BoardData data) {
     final boardItems = data.items.map(_itemToWidget).toList();
-    if(controller.selectedItem!=null){
-      //boardItems.add(BoardItemSelecting(controller));
+    if (controller.hasSelectedItem) {
+      boardItems.add(BoardItemSelecting(controller));
+      boardItems.add(_selectedItemTools(controller));
+      boardItems.add(_selectedItemRotateButton(controller));
     }
     return Container(
       width: double.infinity,
@@ -131,6 +138,126 @@ Widget _itemSelectBorder(){
           // MUST HAVE BACKGROUND IF IT NONE, WILL GET ERROR WHEN DRAG
           child: Stack(children: boardItems),
         ),
+      ),
+    );
+  }
+
+  Widget _selectedItemToolButton(
+      BoardController controller, IconData icon, Function() onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: squareContainer(
+        size: 24,
+        child: Center(
+          child: Icon(
+            icon,
+            size: 20,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _selectedItemTools(BoardController controller) {
+    if (!controller.hasSelectedItem) {
+      return goneBox;
+    }
+    final item = controller.selectedItem;
+    return Positioned(
+      top: item.top - 50,
+      left: item.left,
+      child: AnimatedBuilder(
+        animation: item.matrixNotifier,
+        builder: (ctx, child) {
+          final transformData = item.transformData;
+          Matrix4 matrix = Matrix4.identity();
+          matrix.translate(
+              transformData.translation.dx, transformData.translation.dy);
+          return Transform(
+            transform: matrix,
+            child: decorateContainer(
+              borderColor: Colors.grey,
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              radius: 100,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _selectedItemToolButton(
+                    controller,
+                    Icons.copy_rounded,
+                    () {},
+                  ),
+                  _selectedItemToolButton(
+                    controller,
+                    Icons.delete_outline,
+                    () {},
+                  ),
+                  _selectedItemToolButton(
+                    controller,
+                    Icons.more_horiz,
+                    () {},
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _selectedItemRotateButton(BoardController controller) {
+    if (!controller.hasSelectedItem) {
+      return goneBox;
+    }
+    final item = controller.selectedItem;
+    const rotationButtonSpacing = 50.0;
+    return Positioned(
+      top: item.top - rotationButtonSpacing,
+      left: item.left - rotationButtonSpacing,
+      child: AnimatedBuilder(
+        animation: item.matrixNotifier,
+        builder: (ctx, child) {
+          final transformData = item.transformData;
+          Matrix4 matrix = Matrix4.identity();
+          matrix.rotateX(transformData.rotation);
+          matrix.translate(
+              transformData.translation.dx, transformData.translation.dy);
+          return Transform(
+            transform: matrix,
+            child: SizedBox(
+              width: item.width + rotationButtonSpacing * 2,
+              height: item.height + rotationButtonSpacing * 2,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: GestureDetector(
+                      child: squareContainer(
+                        size: rotationButtonSpacing,
+                        child: Center(
+                          child: circleContainer(
+                            size: 24,
+                            borderColor: Colors.grey,
+                            color: Colors.white,
+                            child: Center(
+                              child: Icon(
+                                Icons.rotate_right_rounded,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -174,7 +301,7 @@ Widget _itemSelectBorder(){
     if (controller.isDrawing) {
       return;
     }
-    if (controller.selectedItem == BoardItem.none) {
+    if (!controller.hasSelectedItem) {
       return;
     }
     if (controller.selectedItem.id != state.id) {
