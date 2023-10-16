@@ -31,8 +31,11 @@ class _BoardPageState extends State<BoardPage> {
         child: Stack(
           children: [
             Padding(
-              padding: EdgeInsets.all(8),
-              child: BoardView(controller: boardController),
+              padding: const EdgeInsets.all(8),
+              child: BoardView(
+                width: double.infinity,
+                controller: boardController,
+              ),
             ),
             Align(
               alignment: Alignment.bottomCenter,
