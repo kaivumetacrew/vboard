@@ -78,7 +78,6 @@ class _BoardContainerState extends State<BoardContainer> {
             widget.width = size.width;
             widget.height = size.height;
             setState(() {});
-            //widget.onSizeChanged();
           }
         },
         child: child,
