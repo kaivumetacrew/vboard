@@ -102,7 +102,11 @@ class BoardController extends ValueNotifier<BoardData> {
   }
 
   void select(BoardItem item) {
-    if(item != selectedItem){
+    if (item.id != selectedItem.id) {
+      value?.items?.forEach((element) {
+        element.matrixNotifier.value = Matrix4.identity();
+      });
+      item.matrixNotifier.value = Matrix4.identity();
       selectedItem = item;
       notifyListeners();
     }
@@ -122,7 +126,7 @@ class BoardController extends ValueNotifier<BoardData> {
   }
 
   void addNewItem<T extends BoardItem>(T item, Function(T) block) {
-    item.id = DateTime.now().millisecond;
+    item.id = DateTime.now().microsecondsSinceEpoch;
     item.lastUpdate = DateTime.now().millisecondsSinceEpoch;
 
     if (item is BoardItemDraw) {
@@ -133,16 +137,14 @@ class BoardController extends ValueNotifier<BoardData> {
     if (item is BoardItemText) {
       item.textColor = currentTextColor;
     }
-    if(item is BoardItemImage){
+    if (item is BoardItemImage) {
       item.width = BoardConfigs.widthDip / 2;
-      item.left =  BoardConfigs.widthDip / 4;
+      item.left = BoardConfigs.widthDip / 4;
       item.top = BoardConfigs.heightDip / 8;
     }
-
-    selectedItem = item;
     block(item);
     value.items.add(item);
-    notifyListeners();
+    select(item);
   }
 
   void undoDraw() {

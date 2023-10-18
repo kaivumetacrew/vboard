@@ -39,6 +39,7 @@ abstract class BoardItem {
   bool get isNone => id == -1;
 
   BoardTransformData get transformData {
+    final matrix = matrixNotifier.value;
     var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
     Offset delta = Offset(array[3] - array[0], array[4] - array[1]);
     return BoardTransformData(
@@ -54,6 +55,10 @@ abstract class BoardItem {
     if (scaleMatrix != null) matrix = scaleMatrix * matrix;
     if (rotationMatrix != null) matrix = rotationMatrix * matrix;
     return matrix!;
+  }
+
+  void printInfo(String tag){
+    debugPrint("BoardItem - $tag - $id, x:$left, y:$top, w:$width, h:$height");
   }
 }
 

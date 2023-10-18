@@ -77,6 +77,14 @@ class BoardItemSelecting extends StatelessWidget {
           onTapDown: (TapDownDetails details) {
             gestureController.startTranslate();
             gestureController.onScaleEnd = () {
+              if (controller.hasSelectedItem) {
+                final transformData = item.transformData;
+                final translation = transformData.translation;
+                item.left = item.left + translation.dx;
+                item.top = item.top + translation.dy;
+
+                item.printInfo("update");
+              }
               gestureController.stopGesture();
               gestureController.onScaleEnd = () {};
             };

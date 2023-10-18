@@ -38,6 +38,7 @@ class BoardViewState extends State<BoardView> {
   void initState() {
     super.initState();
     controller.drawController.onDrawEnd = () => {_onDrawEnd()};
+
   }
 
   @override
@@ -119,6 +120,9 @@ class BoardViewState extends State<BoardView> {
   /// Container for board widgets
   Widget _itemsContainer(BoardData data) {
     final boardItems = data.items.map(_itemToWidget).toList();
+    data.items?.forEach((item) {
+      item.printInfo("rebind");
+    });
     if (controller.hasSelectedItem) {
       boardItems.add(BoardItemSelecting(controller));
       boardItems.add(_selectedItemTools(controller));
@@ -304,12 +308,14 @@ class BoardViewState extends State<BoardView> {
     if (!controller.hasSelectedItem) {
       return;
     }
-    if (controller.selectedItem.id != state.id) {
+    if (controller.selectedItem != null && controller.selectedItem.id != state.id) {
       state.id = controller.selectedItem.id;
       state.update(controller.selectedItem.matrix);
       return;
     }
-    controller.selectedItem.matrixNotifier.value = matrix;
+    if (controller.selectedItem != null) {
+      controller.selectedItem.matrixNotifier.value = matrix;
+    }
   }
 
   /// Callback on finger draw tap up
